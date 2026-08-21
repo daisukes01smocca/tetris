@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#111827" />
+  <title>スマホ対応テトリス</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div>
+        <h1>TETRIS</h1>
+        <p class="sub">PC / Smartphone</p>
+      </div>
+      <button id="pauseBtn" class="small-btn" type="button">一時停止</button>
+    </section>
+
+    <p id="audioNotice" class="audio-notice hidden" role="status">
+      ブラウザの自動再生制限により、BGMは最初のキー操作・クリック・タップ後に開始します。
+    </p>
+
+    <section class="game-layout">
+      <div class="board-wrap">
+        <canvas id="game" width="300" height="600" aria-label="テトリス盤面"></canvas>
+        <div id="overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <div id="overlayTitle">PAUSE</div>
+            <button id="overlayBtn" type="button">再開</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <div class="panel-box">
+          <span>スコア</span>
+          <strong id="score">0</strong>
+        </div>
+        <div class="panel-box">
+          <span>ライン</span>
+          <strong id="lines">0</strong>
+        </div>
+        <div class="panel-box">
+          <span>レベル</span>
+          <strong id="level">1</strong>
+        </div>
+        <div class="panel-box next-box">
+          <span>NEXT</span>
+          <canvas id="next" width="120" height="120" aria-label="次のミノ"></canvas>
+        </div>
+        <div class="setting-box" aria-label="ゲーム設定">
+          <button id="ghostToggleBtn" class="setting-btn is-on" type="button" aria-pressed="true">
+            <span>落下ガイド</span><strong>ON</strong>
+          </button>
+          <button id="soundToggleBtn" class="setting-btn is-on" type="button" aria-pressed="true">
+            <span>効果音</span><strong>ON</strong>
+          </button>
+          <button id="bgmToggleBtn" class="setting-btn is-on" type="button" aria-pressed="true">
+            <span>BGM</span><strong>ON</strong>
+          </button>
+        </div>
+        <button id="restartBtn" class="restart-btn" type="button">最初から</button>
+      </aside>
+    </section>
+
+    <section class="mobile-controls" aria-label="スマホ操作ボタン">
+      <div class="control-row">
+        <button id="rotateBtn" class="control-btn rotate" type="button">↻<span>回転</span></button>
+      </div>
+      <div class="control-row main-controls">
+        <button id="leftBtn" class="control-btn" type="button">◀<span>左</span></button>
+        <button id="downBtn" class="control-btn" type="button">▼<span>下</span></button>
+        <button id="rightBtn" class="control-btn" type="button">▶<span>右</span></button>
+      </div>
+      <div class="control-row">
+        <button id="dropBtn" class="control-btn drop" type="button">⤓<span>一気に落下</span></button>
+      </div>
+      <p class="hint">スワイプ：左右移動 / 下で落下 / タップで回転</p>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
