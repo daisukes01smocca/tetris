@@ -38,6 +38,129 @@ button {
   touch-action: manipulation;
 }
 
+
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(34, 211, 238, .18), transparent 34%),
+    rgba(5, 8, 16, .94);
+  backdrop-filter: blur(7px);
+}
+
+.start-screen.hidden {
+  display: none;
+}
+
+.start-card {
+  width: min(100%, 390px);
+  padding: 28px 24px 22px;
+  border: 1px solid rgba(103, 232, 249, .26);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(32, 40, 64, .98), rgba(17, 24, 39, .98));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .48);
+  text-align: center;
+}
+
+.start-kicker {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .22em;
+}
+
+.start-card h2 {
+  margin: 0;
+  font-size: clamp(42px, 14vw, 66px);
+  line-height: 1;
+  letter-spacing: .14em;
+  text-indent: .14em;
+}
+
+.start-copy {
+  margin: 12px auto 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.start-settings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.start-setting-btn {
+  min-width: 0;
+  min-height: 62px;
+  padding: 8px 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #252c3d;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+}
+
+.start-setting-btn span {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.start-setting-btn strong {
+  font-size: 13px;
+}
+
+.start-setting-btn.is-on {
+  background: linear-gradient(180deg, #164e63, #123847);
+  border-color: rgba(103, 232, 249, .38);
+}
+
+.start-setting-btn.is-on strong {
+  color: var(--accent);
+}
+
+.start-btn {
+  width: 100%;
+  min-height: 58px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #67e8f9, #22d3ee);
+  color: #06131a;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 6px 0 #0e7490;
+}
+
+.start-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #0e7490;
+}
+
+.start-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+
+.start-note {
+  margin: 14px 0 0;
+  color: #cbd5e1;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.small-btn:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+
 .app {
   width: min(100%, 780px);
   min-height: 100svh;
@@ -304,6 +427,22 @@ h1 {
 }
 
 @media (max-width: 520px) {
+
+  .start-card {
+    padding: 22px 16px 18px;
+  }
+
+  .start-settings {
+    gap: 5px;
+  }
+
+  .start-setting-btn {
+    min-height: 56px;
+  }
+
+  .start-setting-btn span {
+    font-size: 9px;
+  }
   .app {
     padding: 8px 10px 12px;
   }

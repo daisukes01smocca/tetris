@@ -8,6 +8,29 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <div id="startScreen" class="start-screen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+    <div class="start-card">
+      <p class="start-kicker">CLASSIC BLOCK PUZZLE</p>
+      <h2 id="startTitle">TETRIS</h2>
+      <p class="start-copy">落ちてくるブロックをそろえてラインを消そう</p>
+
+      <div class="start-settings" aria-label="開始時のゲーム設定">
+        <button id="startBgmToggleBtn" class="start-setting-btn is-on" type="button" aria-pressed="true">
+          <span>🎵 BGM</span><strong>ON</strong>
+        </button>
+        <button id="startSoundToggleBtn" class="start-setting-btn is-on" type="button" aria-pressed="true">
+          <span>🔊 効果音</span><strong>ON</strong>
+        </button>
+        <button id="startGhostToggleBtn" class="start-setting-btn is-on" type="button" aria-pressed="true">
+          <span>👻 落下ガイド</span><strong>ON</strong>
+        </button>
+      </div>
+
+      <button id="startBtn" class="start-btn" type="button">▶ ゲーム開始</button>
+      <p class="start-note">開始ボタンを押すとBGMとゲームが同時にスタートします。</p>
+    </div>
+  </div>
   <main class="app">
     <section class="topbar">
       <div>
@@ -18,7 +41,7 @@
     </section>
 
     <p id="audioNotice" class="audio-notice hidden" role="status">
-      ブラウザの自動再生制限により、BGMは最初のキー操作・クリック・タップ後に開始します。
+      音声を開始できませんでした。BGMボタンを一度OFF/ONして再試行してください。
     </p>
 
     <section class="game-layout">

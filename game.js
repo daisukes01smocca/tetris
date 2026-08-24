@@ -17,6 +17,11 @@ const ghostToggleBtn = document.getElementById('ghostToggleBtn');
 const soundToggleBtn = document.getElementById('soundToggleBtn');
 const bgmToggleBtn = document.getElementById('bgmToggleBtn');
 const audioNotice = document.getElementById('audioNotice');
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const startGhostToggleBtn = document.getElementById('startGhostToggleBtn');
+const startSoundToggleBtn = document.getElementById('startSoundToggleBtn');
+const startBgmToggleBtn = document.getElementById('startBgmToggleBtn');
 
 const COLS = 10;
 const ROWS = 20;
@@ -54,6 +59,7 @@ let paused = false;
 let lastTime = 0;
 let dropCounter = 0;
 let animationId = 0;
+let gameStarted = false;
 let ghostEnabled = localStorage.getItem('tetrisGhost') !== 'off';
 let soundEnabled = localStorage.getItem('tetrisSound') !== 'off';
 let bgmEnabled = localStorage.getItem('tetrisBgm') !== 'off';
@@ -109,18 +115,21 @@ const BGM_CHORDS = {
   Dm: { bass: ['D2', 'A2'], tones: ['D3', 'F3', 'A3'] }
 };
 
+function syncSettingButton(button, enabled) {
+  if (!button) return;
+  button.classList.toggle('is-on', enabled);
+  button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+  const state = button.querySelector('strong');
+  if (state) state.textContent = enabled ? 'ON' : 'OFF';
+}
+
 function updateSettingButtons() {
-  ghostToggleBtn.classList.toggle('is-on', ghostEnabled);
-  ghostToggleBtn.setAttribute('aria-pressed', ghostEnabled ? 'true' : 'false');
-  ghostToggleBtn.querySelector('strong').textContent = ghostEnabled ? 'ON' : 'OFF';
-
-  soundToggleBtn.classList.toggle('is-on', soundEnabled);
-  soundToggleBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
-  soundToggleBtn.querySelector('strong').textContent = soundEnabled ? 'ON' : 'OFF';
-
-  bgmToggleBtn.classList.toggle('is-on', bgmEnabled);
-  bgmToggleBtn.setAttribute('aria-pressed', bgmEnabled ? 'true' : 'false');
-  bgmToggleBtn.querySelector('strong').textContent = bgmEnabled ? 'ON' : 'OFF';
+  syncSettingButton(ghostToggleBtn, ghostEnabled);
+  syncSettingButton(soundToggleBtn, soundEnabled);
+  syncSettingButton(bgmToggleBtn, bgmEnabled);
+  syncSettingButton(startGhostToggleBtn, ghostEnabled);
+  syncSettingButton(startSoundToggleBtn, soundEnabled);
+  syncSettingButton(startBgmToggleBtn, bgmEnabled);
 }
 
 function setAudioNotice(visible) {
@@ -149,7 +158,7 @@ function unlockAudio() {
   const finish = () => {
     audioUnlocked = true;
     setAudioNotice(false);
-    if (bgmEnabled && !paused && !gameOver) startBgm(false);
+    if (gameStarted && bgmEnabled && !paused && !gameOver) startBgm(false);
   };
 
   if (ac.state === 'suspended') {
@@ -336,7 +345,7 @@ function scheduleAccompaniment(harmony, barStart, beatSec) {
 }
 
 function scheduleBgmBar() {
-  if (!bgmRunning || !bgmEnabled || !audioUnlocked || paused || gameOver) {
+  if (!gameStarted || !bgmRunning || !bgmEnabled || !audioUnlocked || paused || gameOver) {
     bgmRunning = false;
     return;
   }
@@ -372,7 +381,7 @@ function startBgm(resetPosition = false) {
     bgmBarIndex = 0;
     bgmNextBarTime = 0;
   }
-  if (!bgmEnabled || !audioUnlocked || paused || gameOver || bgmRunning) return;
+  if (!gameStarted || !bgmEnabled || !audioUnlocked || paused || gameOver || bgmRunning) return;
   const ac = ensureAudio();
   if (!ac || ac.state !== 'running') return;
   bgmRunning = true;
@@ -419,8 +428,9 @@ function createPiece(type = takeType()) {
   };
 }
 
-function resetGame() {
+function resetGame(shouldStart = true) {
   stopBgm(true);
+  gameStarted = shouldStart;
   board = createBoard();
   bag = [];
   score = 0;
@@ -432,11 +442,19 @@ function resetGame() {
   nextPiece = createPiece();
   dropCounter = 0;
   lastTime = performance.now();
+  pauseBtn.textContent = '一時停止';
+  pauseBtn.disabled = !shouldStart;
   updateInfo();
   hideOverlay();
   cancelAnimationFrame(animationId);
   animationId = requestAnimationFrame(update);
-  if (bgmEnabled && audioUnlocked) startBgm(true);
+  if (shouldStart && bgmEnabled && audioUnlocked) startBgm(true);
+}
+
+function startGame() {
+  startScreen.classList.add('hidden');
+  unlockAudio();
+  resetGame(true);
 }
 
 function updateInfo() {
@@ -510,7 +528,7 @@ function clearLines() {
 }
 
 function move(dx) {
-  if (gameOver || paused) return;
+  if (!gameStarted || gameOver || paused) return;
   if (!collides(current, dx, 0)) {
     current.x += dx;
     sfx.move();
@@ -518,7 +536,7 @@ function move(dx) {
 }
 
 function softDrop() {
-  if (gameOver || paused) return;
+  if (!gameStarted || gameOver || paused) return;
   if (!collides(current, 0, 1)) {
     current.y++;
     score += 1;
@@ -539,7 +557,7 @@ function autoDrop() {
 }
 
 function hardDrop() {
-  if (gameOver || paused) return;
+  if (!gameStarted || gameOver || paused) return;
   let distance = 0;
   while (!collides(current, 0, 1)) {
     current.y++;
@@ -557,7 +575,7 @@ function rotateMatrix(matrix) {
 }
 
 function rotate() {
-  if (gameOver || paused || current.type === 'O') return;
+  if (!gameStarted || gameOver || paused || current.type === 'O') return;
   const rotated = rotateMatrix(current.matrix);
   const kicks = [0, -1, 1, -2, 2];
   for (const kick of kicks) {
@@ -659,7 +677,7 @@ function update(time = 0) {
   const delta = time - lastTime;
   lastTime = time;
 
-  if (!paused && !gameOver) {
+  if (gameStarted && !paused && !gameOver) {
     dropCounter += delta;
     const interval = Math.max(90, 850 - (level - 1) * 65);
     if (dropCounter > interval) autoDrop();
@@ -683,11 +701,11 @@ function endGame() {
   gameOver = true;
   stopBgm(false);
   sfx.gameOver();
-  showOverlay('GAME OVER', 'もう一度');
+  showOverlay('GAME OVER', 'もう一度プレイ');
 }
 
 function togglePause() {
-  if (gameOver) return;
+  if (!gameStarted || gameOver) return;
   paused = !paused;
   if (paused) {
     stopBgm(false);
@@ -702,8 +720,16 @@ function togglePause() {
 }
 
 document.addEventListener('keydown', (event) => {
-  unlockAudio();
   const key = event.key;
+  if (!gameStarted) {
+    if (key === 'Enter' || key === ' ') {
+      event.preventDefault();
+      startGame();
+    }
+    return;
+  }
+
+  unlockAudio();
   if (['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' ','z','Z','x','X','p','P'].includes(key)) {
     event.preventDefault();
   }
@@ -754,39 +780,54 @@ bindButton('downBtn', softDrop, true);
 bindButton('rotateBtn', rotate);
 bindButton('dropBtn', hardDrop);
 
-ghostToggleBtn.addEventListener('click', () => {
+function toggleGhostSetting() {
   ghostEnabled = !ghostEnabled;
   localStorage.setItem('tetrisGhost', ghostEnabled ? 'on' : 'off');
   updateSettingButtons();
-});
+}
 
-soundToggleBtn.addEventListener('click', () => {
+function toggleSoundSetting() {
   soundEnabled = !soundEnabled;
   localStorage.setItem('tetrisSound', soundEnabled ? 'on' : 'off');
   updateSettingButtons();
-  if (soundEnabled) {
+  if (soundEnabled && gameStarted) {
     unlockAudio();
     tone(440, 0.05, 0.025, 'triangle', 660);
   }
-});
+}
 
-bgmToggleBtn.addEventListener('click', () => {
+function toggleBgmSetting() {
   bgmEnabled = !bgmEnabled;
   localStorage.setItem('tetrisBgm', bgmEnabled ? 'on' : 'off');
   updateSettingButtons();
-  if (bgmEnabled) {
+  if (bgmEnabled && gameStarted) {
     unlockAudio();
     startBgm(false);
   } else {
     stopBgm(false);
   }
-});
+}
 
+ghostToggleBtn.addEventListener('click', toggleGhostSetting);
+soundToggleBtn.addEventListener('click', toggleSoundSetting);
+bgmToggleBtn.addEventListener('click', toggleBgmSetting);
+startGhostToggleBtn.addEventListener('click', toggleGhostSetting);
+startSoundToggleBtn.addEventListener('click', toggleSoundSetting);
+startBgmToggleBtn.addEventListener('click', toggleBgmSetting);
+
+startBtn.addEventListener('click', startGame);
 pauseBtn.addEventListener('click', togglePause);
-restartBtn.addEventListener('click', resetGame);
+restartBtn.addEventListener('click', () => {
+  unlockAudio();
+  resetGame(true);
+});
 overlayBtn.addEventListener('click', () => {
-  if (gameOver) resetGame();
-  else togglePause();
+  if (gameOver) {
+    unlockAudio();
+    resetGame(true);
+  } else {
+    togglePause();
+  }
 });
 
 // Smartphone gestures on the game canvas.
@@ -849,16 +890,12 @@ canvas.addEventListener('pointercancel', () => {
   touchLast = null;
 });
 
-document.addEventListener('pointerdown', unlockAudio, { passive: true });
-document.addEventListener('touchstart', unlockAudio, { passive: true, once: false });
-document.addEventListener('mousedown', unlockAudio, { passive: true });
-
 window.addEventListener('blur', () => {
-  if (!gameOver && !paused) togglePause();
+  if (gameStarted && !gameOver && !paused) togglePause();
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && audioUnlocked && bgmEnabled && !paused && !gameOver) {
+  if (gameStarted && !document.hidden && audioUnlocked && bgmEnabled && !paused && !gameOver) {
     const ac = ensureAudio();
     if (ac && ac.state === 'suspended') ac.resume().then(() => startBgm(false)).catch(() => {});
     else startBgm(false);
@@ -866,5 +903,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 updateSettingButtons();
-resetGame();
-tryAutoplayBgm();
+resetGame(false);
+startScreen.classList.remove('hidden');
+requestAnimationFrame(() => startBtn.focus());
